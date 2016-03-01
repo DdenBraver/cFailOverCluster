@@ -17,7 +17,9 @@ function Get-TargetResource
         [string] $StaticIPAddress,
         
         [parameter(Mandatory)]
-        [PSCredential] $DomainAdministratorCredential
+        [PSCredential] $DomainAdministratorCredential,
+
+        [bool]$Nostorage = $false
     )
 
     $ComputerInfo = Get-WmiObject Win32_ComputerSystem
@@ -67,7 +69,9 @@ function Set-TargetResource
         [string] $StaticIPAddress,
         
         [parameter(Mandatory)]
-        [PSCredential] $DomainAdministratorCredential
+        [PSCredential] $DomainAdministratorCredential,
+
+        [bool]$Nostorage = $false
     )
 
     $bCreate = $true
@@ -126,7 +130,13 @@ function Set-TargetResource
                 }
             }
 
-            Add-ClusterNode $env:COMPUTERNAME -Cluster $Name
+            $AddClusterParameters = @{Name = $env:COMPUTERNAME; Cluster=$Name;} 
+            if ($Nostorage -eq $true)
+            {
+                $AddClusterParameters.Add('NoStorage',$true)
+            }
+
+            Add-ClusterNode @AddClusterParameters
             
             Write-Verbose -Message "Added node to Cluster $Name"
         
@@ -165,7 +175,9 @@ function Test-TargetResource
         [string] $StaticIPAddress,
         
         [parameter(Mandatory)]
-        [PSCredential] $DomainAdministratorCredential
+        [PSCredential] $DomainAdministratorCredential,
+
+        [bool]$Nostorage = $false
     )
 
     $bRet = $false
